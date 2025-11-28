@@ -1,8 +1,19 @@
+import asyncio
 from fractioncollector.fractionator import FractionCollector
+from collectionlogic.collector import CollectionLogic
+from redis import Redis
+
+
+async def main():
+    redis_client = Redis("10.20.18.65", decode_responses=True)
+    cl = CollectionLogic(redis_client)
+    x = await cl.fractionate()
+
+    print(x)
+
 
 if __name__ == "__main__":
-    fc = FractionCollector()
+    # fc = FractionCollector()
 
-    info = fc.get_actual_plate_info(127001)
-
-    print(info)
+    # info = fc.get_actual_plate_info(0)
+    asyncio.run(main())
