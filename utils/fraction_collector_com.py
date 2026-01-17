@@ -62,3 +62,7 @@ def get_redis_int(r: Redis, key: str, default_value: int):
         logging.warning(f"[Redis]: Unable to get key ({key})")
         logging.error(f"Error Encountered: {ex}")
         return default_value
+
+
+if __name__ == "__main__":
+    set_diverter_valve(False)

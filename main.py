@@ -1,23 +1,55 @@
 import os
-import string 
+import string
+import logging
+import json
+import time
+from collectionlogic.collector import CollectionLogic
+from redis import Redis
+from pymongo import MongoClient
 
-def get_settings(): 
-    settings = {}
-
-    settings["REDIS_CONNECTION_URL"] = os.environ.get("REDIS_CONNECTION_URL", "10.20.18.65")
-    settings["MODBUS_CONNECTION_URL"] = os.environ.get("MODBUS_CONNECTION_URL","10.20.20.25") 
-    
-    return settings
+REDIS_URL = os.environ.get("REDIS_URL", "10.20.18.65")
+MONGO_URL = os.environ.get(
+    "MONGO_URL", "mongodb:dsp_database_user:biosmb@10.20.18.65:27017"
+)
 
 
-if __name__ == "__main__": 
-    rows = list(string.ascii_uppercase[:8])
-    cols = [f"{i:02d}" for i in range(1, 13)] 
+def main():
 
-    wells = [] 
-    for i, row in enumerate(rows): 
-        if i > 0: 
-            cols.reverse()
-        wells.extend([f"{row}{c}" for c in cols])
+    redis_client = Redis(REDIS_URL, decode_responses=True)
+    fc_logic = CollectionLogic()
 
-    print(wells) 
+    fraction_conditions = {
+        "load": [
+            0.25,
+            0.40,
+            0.50,
+            0.60,
+            0.75,
+        ],
+        "elute": [0.1],
+        "wash": [0.1],
+        "load bypass": [0.1],
+    }
+
+    tol = 0.5
+
+    try:
+        while True:
+            load_status = json.loads(redis_client.get("load_status"))
+            latest_obs = json.loads(redis_client.get("latest_observation"))
+
+            percent_done = load_status["percent_done"]
+            step = load_status["step"]
+
+            # else:
+            #     continue
+
+            time.sleep(2)
+
+    except KeyboardInterrupt:
+        pass
+
+
+if __name__ == "__main__":
+
+    main()

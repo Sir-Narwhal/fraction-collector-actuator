@@ -151,7 +151,7 @@ class CollectionLogic:
         set_diverter_valve(False)
 
         # Step 7:
-        set_redis_bool(self.redis_client, key=self.fractionate_key, value=True)
+        set_redis_bool(self.redis_client, key=self.fractionate_key, value=False)
 
         # Step 8:
         self.global_index += 1
