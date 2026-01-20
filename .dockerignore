@@ -1,1 +1,5 @@
 obsolete
+ignore 
+.venv 
+images 
+.gitignore

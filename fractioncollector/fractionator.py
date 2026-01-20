@@ -1,7 +1,7 @@
 from typing import Dict
-from .mapping import PositionMapping
-from .plate import Plate
-from .well import Well
+from fractioncollector.mapping import PositionMapping
+from fractioncollector.plate import Plate
+from fractioncollector.well import Well
 
 
 class FractionCollector:

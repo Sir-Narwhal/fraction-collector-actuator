@@ -3,7 +3,11 @@ import string
 import logging
 import json
 import time
+import asyncio
 from collectionlogic.collector import CollectionLogic
+from recipes.continuous_collection import checkrun_continuous
+from recipes.discrete_collection import checkrun_discrete
+from utils.fraction_collector_com import set_diverter_valve
 from redis import Redis
 from pymongo import MongoClient
 
@@ -12,44 +16,30 @@ MONGO_URL = os.environ.get(
     "MONGO_URL", "mongodb:dsp_database_user:biosmb@10.20.18.65:27017"
 )
 
+logging.basicConfig(level=logging.DEBUG)
 
-def main():
 
+async def main():
     redis_client = Redis(REDIS_URL, decode_responses=True)
-    fc_logic = CollectionLogic()
 
-    fraction_conditions = {
-        "load": [
-            0.25,
-            0.40,
-            0.50,
-            0.60,
-            0.75,
-        ],
-        "elute": [0.1],
-        "wash": [0.1],
-        "load bypass": [0.1],
-    }
+    continuous_task = asyncio.create_task(
+        checkrun_continuous(redis_client, "continuous-fractionation")
+    )
+    discrete_task = asyncio.create_task(
+        checkrun_discrete(redis_client, "discrete-fractionation")
+    )
 
-    tol = 0.5
-
-    try:
-        while True:
-            load_status = json.loads(redis_client.get("load_status"))
-            latest_obs = json.loads(redis_client.get("latest_observation"))
-
-            percent_done = load_status["percent_done"]
-            step = load_status["step"]
-
-            # else:
-            #     continue
-
-            time.sleep(2)
-
-    except KeyboardInterrupt:
-        pass
+    await continuous_task
+    await discrete_task
 
 
 if __name__ == "__main__":
 
-    main()
+    try:
+        asyncio.run(main())
+    except Exception as ex:
+        logging.debug(f"[MAIN] Error encountered: {ex}")
+    except KeyboardInterrupt:
+        pass
+    finally:
+        set_diverter_valve(False)
