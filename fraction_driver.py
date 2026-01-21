@@ -40,7 +40,7 @@ async def discrete_collect(
         f"load_volume_to_collect: {load_volume_to_collect}\tloaded_volume: {loaded_volume:.2f}"
     )
 
-    if load_volume_to_collect >= 160:
+    if load_volume_to_collect >= 180:
         stop_collect = True
         raise SystemExit()
 
@@ -72,7 +72,7 @@ async def continuous_collect(r: Redis, stop_collect: bool = False):
 
 async def main():
     redis_client = Redis("10.20.18.65", decode_responses=True)
-    load_volume_to_collect = 110
+    load_volume_to_collect = 40
     try:
         while True:
             # await continuous_collect(redis_client)
@@ -86,5 +86,11 @@ async def main():
 
 
 if __name__ == "__main__":
+    # redis_client = Redis("10.20.18.65", decode_responses=True)
 
+    # load_status: Dict[str:float, str:str] = json.loads(redis_client.get(f"load_status"))
+
+    # current_step = load_status["step"]
+
+    # asyncio.run(continuous_collect(redis_client))
     asyncio.run(main())

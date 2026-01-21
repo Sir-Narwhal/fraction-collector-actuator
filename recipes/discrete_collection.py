@@ -36,6 +36,7 @@ async def checkrun_discrete(r: Redis, expr_name):
         logging.debug(f"[FC Discrete] Exception occurred: {ex}")
     finally:
         set_diverter_valve(False)
+        set_redis_bool(r, "discrete-fractionate", False)
         logging.debug(f"[FC Discrete] Diverter Valve Turned Off")
 
 

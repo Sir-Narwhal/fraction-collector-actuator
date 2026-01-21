@@ -6,7 +6,13 @@ from pymongo import MongoClient
 from typing import Dict, Tuple
 from datetime import datetime, timezone
 from fractioncollector import FractionCollector
-from utils import advance_fc, set_diverter_valve, set_redis_bool, get_redis_int
+from utils import (
+    advance_fc,
+    set_diverter_valve,
+    set_redis_bool,
+    get_redis_int,
+    get_redis_bool,
+)
 from collectionlogic.deadvolume import (
     get_divertervalve_collection_dv,
     get_biosmb_to_divertervalve_dv,
@@ -200,6 +206,7 @@ class CollectionLogic:
                 mongo_db = mongo_client.get_database(f"{self.mongo_db_name}")
                 mongo_coll = mongo_db.get_collection(f"{self.mongo_collection_name}")
                 mongo_coll.insert_one(dv_info_1)
+                mongo_coll.insert_one(dv_info_2)
                 mongo_coll.insert_one(sample_info)
 
             logging.debug(f"[MongoDB] Successful entry to MongoDB")
@@ -221,12 +228,12 @@ class CollectionLogic:
         dv_biosmb_to_diverter = get_biosmb_to_divertervalve_dv()  # [=] mL
         deadtime_biosmb_to_diverter = dv_biosmb_to_diverter / self.flowrate  # [=] min
         await asyncio.sleep(deadtime_biosmb_to_diverter * 60)
-        dv_info = self.get_wellplate_info(self.global_index)
-        logging.debug(f"[FC] Collected wellplate data: {dv_info}")
+        dv_info_1 = self.get_wellplate_info(self.global_index)
+        logging.debug(f"[FC] Collected wellplate data: {dv_info_1}")
 
         # Step 2:
         set_diverter_valve(True)
-        dv_info["start_time"] = datetime.now(timezone.utc)
+        dv_info_1["start_time"] = datetime.now(timezone.utc)
         logging.debug(f"[FC] Diverter Valve turned off")
 
         # Step 3: Purge diverter valve
@@ -234,17 +241,28 @@ class CollectionLogic:
         deadtime_diverter_to_collection = (
             dv_diverter_to_collection / self.flowrate
         )  # [=] min
-        await asyncio.sleep(deadtime_diverter_to_collection * 60)
-        dv_info["end_time"] = datetime.now(timezone.utc)
-        logging.debug(f"[FC] Diverter Valve Purged Successfully")
-        dv_info["expr_name"] = f"DEAD VOLUME"
-        dv_info["cycle_tag"] = cycle_id
+
+        await asyncio.sleep(deadtime_diverter_to_collection * 60 / 2)
+        dv_info_1["end_time"] = datetime.now(timezone.utc)
+        dv_info_1["expr_name"] = "DEAD VOLUME #1"
+        dv_info_1["cycle_tag"] = cycle_id
+
+        self.global_index += 1
+        dv_info_2 = self.get_wellplate_info(self.global_index)
+        advance_fc()
+
+        dv_info_2["start_time"] = datetime.now(timezone.utc)
+        await asyncio.sleep(deadtime_diverter_to_collection * 60 / 2)
+        dv_info_2["end_time"] = datetime.now(timezone.utc)
+        dv_info_2["expr_name"] = "DEAD VOLUME #2"
+        dv_info_2["cycle_tag"] = cycle_id
 
         try:
             with MongoClient(f"{self.mongo_client_url}") as mongo_client:
                 mongo_db = mongo_client.get_database(f"{self.mongo_db_name}")
                 mongo_coll = mongo_db.get_collection(f"{self.mongo_collection_name}")
-                mongo_coll.insert_one(dv_info)
+                mongo_coll.insert_one(dv_info_1)
+                mongo_coll.insert_one(dv_info_2)
 
             logging.debug(f"[MongoDB] Successful entry to MongoDB")
 
@@ -288,11 +306,11 @@ class CollectionLogic:
             except Exception as ex:
                 logging.error(f"[MongoDB] Error occurred: {ex}")
 
-            continuous_fractionation_bool = self.redis_client.get(
-                "continuous-fractionate"
+            continuous_fractionation_bool = get_redis_bool(
+                self.redis_client, "continuous-fractionate", False
             )
 
-            if continuous_fractionation_bool is not True:
+            if continuous_fractionation_bool is False:
                 break
 
         # Step 6:
