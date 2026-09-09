@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.0](https://github.com/Sir-Narwhal/fraction-collector-actuator/compare/fraction-collector-actuator-v1.0.0...fraction-collector-actuator-v1.1.0) (2026-09-09)
+
+
+### Features
+
+* externalize secrets, add docs, and bootstrap release automation ([be2f429](https://github.com/Sir-Narwhal/fraction-collector-actuator/commit/be2f42984bc6d29116910f19dc2228a77bc0b9ed))
+
+
+### Bug Fixes
+
+* repair commitlint CI job ([e2e439a](https://github.com/Sir-Narwhal/fraction-collector-actuator/commit/e2e439a3ec222d57ab5f96a56d73dc8a9bfe0e07))
+
 ## 1.0.0 (2026-09-09)
 
 ### Features
