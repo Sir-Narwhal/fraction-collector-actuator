@@ -1,0 +1,29 @@
+name: Attach release artifact
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-attach:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Build Docker image
+        run: docker build -t "fraction-collector-actuator:${{ github.event.release.tag_name }}" .
+
+      - name: Save image tarball
+        run: |
+          mkdir -p images
+          docker save -o "images/fraction-collector-actuator-${{ github.event.release.tag_name }}.tar" "fraction-collector-actuator:${{ github.event.release.tag_name }}"
+
+      - name: Upload tarball to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" "images/fraction-collector-actuator-${{ github.event.release.tag_name }}.tar"

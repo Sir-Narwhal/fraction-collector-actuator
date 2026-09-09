@@ -1,9 +1,17 @@
+import os
 import asyncio
 import json
 import logging
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from redis import Redis
 from typing import Dict
 from utils.fraction_collector_com import get_redis_bool
+
+REDIS_URL = os.environ.get("REDIS_URL", "localhost")
 
 logging.basicConfig(level=logging.INFO)
 
@@ -15,7 +23,7 @@ async def discrete_collect(
 ):
     load_duration = float(r.get(f"load_duration"))
     load_flowrate = float(r.get(f"load_flow_rate"))
-    load_status: Dict[str:float, str:str] = json.loads(r.get(f"load_status"))
+    load_status: Dict[str, object] = json.loads(r.get(f"load_status"))
 
     current_step = load_status["step"]
     percent_complete = float(load_status["percent_done"])
@@ -50,7 +58,7 @@ async def discrete_collect(
 async def continuous_collect(r: Redis, stop_collect: bool = False):
     load_duration = float(r.get(f"load_duration"))
     load_flowrate = float(r.get(f"load_flow_rate"))
-    load_status: Dict[str:float, str:str] = json.loads(r.get(f"load_status"))
+    load_status: Dict[str, object] = json.loads(r.get(f"load_status"))
 
     current_step = load_status["step"]
     percent_complete = float(load_status["percent_done"])
@@ -71,7 +79,7 @@ async def continuous_collect(r: Redis, stop_collect: bool = False):
 
 
 async def main():
-    redis_client = Redis("10.20.18.65", decode_responses=True)
+    redis_client = Redis(REDIS_URL, decode_responses=True)
     load_volume_to_collect = 40
     try:
         while True:
@@ -86,9 +94,9 @@ async def main():
 
 
 if __name__ == "__main__":
-    # redis_client = Redis("10.20.18.65", decode_responses=True)
+    # redis_client = Redis(REDIS_URL, decode_responses=True)
 
-    # load_status: Dict[str:float, str:str] = json.loads(redis_client.get(f"load_status"))
+    # load_status: Dict[str, object] = json.loads(redis_client.get(f"load_status"))
 
     # current_step = load_status["step"]
 

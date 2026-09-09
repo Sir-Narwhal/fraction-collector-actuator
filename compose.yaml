@@ -1,12 +1,10 @@
 services:
   fraction-collector-actuator:
-    image: fraction-collector-actuator:1.0.3
+    image: fraction-collector-actuator:1.0.0
 
-    environment:
-      REDIS_URL: "10.20.18.65"
-      MONGO_URL: "mongodb:dsp_database_user:biosmb@10.20.18.65:27117"
-    
-    ports:
-      - 27017:27117
+    # Loads REDIS_URL / MONGO_URL / MODBUS_URL from a local .env file
+    # (see .env.example) instead of baking credentials into this file.
+    env_file:
+      - .env
 
     restart: unless-stopped

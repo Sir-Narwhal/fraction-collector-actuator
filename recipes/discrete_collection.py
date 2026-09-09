@@ -1,6 +1,11 @@
 import os
 import asyncio
 import logging
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from redis import Redis
 from utils.fraction_collector_com import (
     set_diverter_valve,
@@ -9,7 +14,7 @@ from utils.fraction_collector_com import (
 )
 from collectionlogic.collector import CollectionLogic
 
-REDIS_URL = os.environ.get(f"REDIS_URL", "10.20.18.65")
+REDIS_URL = os.environ.get("REDIS_URL", "localhost")
 
 
 async def checkrun_discrete(r: Redis, expr_name):
@@ -19,7 +24,7 @@ async def checkrun_discrete(r: Redis, expr_name):
         while True:
 
             logging.debug(
-                f"discrete-fractionate: {get_redis_bool(r, "discrete-fractionate", False)}\tcontinuous-fractionate: {get_redis_bool(r, "continuous-fractionate", False)}"
+                f"discrete-fractionate: {get_redis_bool(r, 'discrete-fractionate', False)}\tcontinuous-fractionate: {get_redis_bool(r, 'continuous-fractionate', False)}"
             )
             if get_redis_bool(r, "discrete-fractionate", False) and not (
                 get_redis_bool(r, "continuous-fractionate", False)

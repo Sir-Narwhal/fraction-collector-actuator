@@ -248,3 +248,4 @@ def calculate_deadvolume():
 
 if __name__ == "__main__":
     print(f"get_biofrac_dv(): \t{get_divertervalve_collection_dv()}")
+    print(calculate_deadvolume())
