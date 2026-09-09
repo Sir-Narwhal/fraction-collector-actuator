@@ -1,3 +1,4 @@
+import os
 import json
 import logging
 import asyncio
@@ -18,6 +19,8 @@ from collectionlogic.deadvolume import (
     get_biosmb_to_divertervalve_dv,
 )
 from collectionlogic.exceptions import CollectorLogicError, NoFlowrateError
+
+MONGO_URL = os.environ.get("MONGO_URL")
 
 FC_OUTLET = "fc_outlet"
 FC_DEFAULT = "outlet_to_divert"
@@ -70,13 +73,13 @@ class CollectionLogic:
         redis_client: Redis,
         expr_name: str = "default_experiment",
         fc_samplevolume: float = 1.6,
-        mongo_client_url: str = "mongodb://dsp_database_user:biosmb@10.20.18.65:27117/",
+        mongo_client_url: str = None,
         mongo_db_name: str = "dsp_db",
         mongo_collection_name: str = "fraction-collector-data",
     ):
         self.fc = FractionCollector()
         self.redis_client = redis_client
-        self.mongo_client_url = mongo_client_url
+        self.mongo_client_url = mongo_client_url or MONGO_URL
         self.expr_name = expr_name
         self.fc_samplevolume = fc_samplevolume  # [=] mL
 

@@ -1,6 +1,11 @@
 import os
 import asyncio
 import logging
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from redis import Redis
 from collectionlogic.collector import CollectionLogic
 from utils.fraction_collector_com import set_diverter_valve, get_redis_bool
@@ -13,7 +18,7 @@ Tasks:
 
 """
 
-REDIS_URL = os.environ.get(f"REDIS_URL", "10.20.18.65")
+REDIS_URL = os.environ.get("REDIS_URL", "localhost")
 
 
 async def checkrun_continuous(r: Redis, expr_name: str):

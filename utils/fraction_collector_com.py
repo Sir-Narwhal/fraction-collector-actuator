@@ -1,11 +1,15 @@
+import os
 import logging
 from redis import Redis
 from pymodbus.client import ModbusTcpClient
 
+MODBUS_URL = os.environ.get("MODBUS_URL", "localhost")
+
 
 def advance_fc():
+    client = None
     try:
-        client = ModbusTcpClient("10.20.20.25")
+        client = ModbusTcpClient(MODBUS_URL)
         client.connect()
         client.write_coil(16384, True)
 
@@ -13,12 +17,14 @@ def advance_fc():
         logging.warning("Failed to advance fraction collector")
         logging.warning(e)
     finally:
-        client.close()
+        if client is not None:
+            client.close()
 
 
 def set_diverter_valve(divert: bool):
+    client = None
     try:
-        client = ModbusTcpClient("10.20.20.25")
+        client = ModbusTcpClient(MODBUS_URL)
         client.connect()
         client.write_coil(8265, divert)
 
@@ -26,7 +32,8 @@ def set_diverter_valve(divert: bool):
         logging.warning("Failed to set fraction collector diverter")
         logging.warning(e)
     finally:
-        client.close()
+        if client is not None:
+            client.close()
 
 
 def set_redis_bool(r: Redis, key: str, value: bool):

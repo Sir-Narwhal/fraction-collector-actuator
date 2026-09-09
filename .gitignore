@@ -1,0 +1,15 @@
+# Secrets / local config
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Build output
+images/
+obsolete/
+ignore/

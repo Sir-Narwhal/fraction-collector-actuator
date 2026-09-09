@@ -1,20 +1,17 @@
 import os
-import string
 import logging
-import json
-import time
 import asyncio
-from collectionlogic.collector import CollectionLogic
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from recipes.continuous_collection import checkrun_continuous
 from recipes.discrete_collection import checkrun_discrete
 from utils.fraction_collector_com import set_diverter_valve
 from redis import Redis
-from pymongo import MongoClient
 
-REDIS_URL = os.environ.get("REDIS_URL", "10.20.18.65")
-MONGO_URL = os.environ.get(
-    "MONGO_URL", "mongodb:dsp_database_user:biosmb@10.20.18.65:27017"
-)
+REDIS_URL = os.environ.get("REDIS_URL", "localhost")
 
 logging.basicConfig(level=logging.DEBUG)
 

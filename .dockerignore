@@ -1,5 +1,9 @@
 obsolete
-ignore 
-.venv 
-images 
+ignore
+.venv
+images
 .gitignore
+.git
+.env
+.env.*
+!.env.example
